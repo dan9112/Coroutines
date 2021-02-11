@@ -14,35 +14,35 @@ class MainActivity : AppCompatActivity() {
     class Resource {
         init {
             acquired++
-        } // Acquire the resource
+        } // Получение ресурса
 
         fun close() {
             acquired--
-        } // Release the resource
+        } // Высвобождение ресурса
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         runBlocking {
-            repeat(100_000) { // Launch 100K coroutines
+            repeat(100_000) { // Запуск 100K сопрограмм
                 launch {
-                    var resource: Resource? = null // Not acquired yet
+                    var resource: Resource? = null // Пока не получен
                     try {
-                        withTimeout(5) { // Timeout of 60 ms
-                            delay(10) // Delay for 50 ms
+                        withTimeout(60) { // Тайм-аут 60 мс
+                            delay(50) // Ожидание 50 мс
                             resource =
-                                Resource() // Store a resource to the variable if acquired
+                                Resource() // Сохранение ресурса в переменной, если он был получен
                         }
-                        // We can do something else with the resource here
+                        // Здесь возможно что-нибудь сделать с ресурсом
                     } finally {
-                        resource?.close() // Release the resource if it was acquired
+                        resource?.close() // Высвобождение ресурса, если он был получен
                     }
                 }
             }
         }
-        // Outside of runBlocking all coroutines have completed
-        Log.v("myLog", acquired.toString()) // Print the number of resources still acquired
+        // Вне runBlocking все сопрограммы завершены
+        Log.v("myLog", acquired.toString()) // Вывод количества полученных ресурсов
         onDestroy()
     }
 }

@@ -7,6 +7,8 @@ import kotlinx.coroutines.*
 import kotlin.system.measureTimeMillis
 
 class MainActivity : AppCompatActivity() {
+    private val scope = MainScope() // область действия MyUIClass
+
     // обратите внимание, что в этом примере у нас нет runBlocking справа от main
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,27 +20,33 @@ class MainActivity : AppCompatActivity() {
             // но ожидание результата должно включать либо приостановку, либо блокировку.
             // здесь используется `runBlocking {...}` для блокировки основного потока в ожидании результата
             runBlocking {
-                Log.v("myLog", "The answer is ${one.await() + two.await()}")
+                Log.v("myLog", "Ответ: ${one.await() + two.await()}")
             }
         }
-        Log.v("myLog", "Completed in $time ms")
+        Log.v("myLog", "Завершено за $time мс")
     }
 
-    private fun somethingUsefulOneAsync() = GlobalScope.async {
+    private fun somethingUsefulOneAsync() = scope.async {
         doSomethingUsefulOne()
     }
 
-    private fun somethingUsefulTwoAsync() = GlobalScope.async {
+    private fun somethingUsefulTwoAsync() = scope.async {
         doSomethingUsefulTwo()
     }
 
     private suspend fun doSomethingUsefulOne(): Int {
-        delay(1000L) // pretend we are doing something useful here
+        delay(1000L)
         return 13
     }
 
     private suspend fun doSomethingUsefulTwo(): Int {
-        delay(1000L) // pretend we are doing something useful here, too
+        delay(1000L)
         return 29
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        scope.cancel()
     }
 }
